@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <h1>WebSocket Test</h1>
+  
+  <input type="text" id="messageInput" placeholder="Type a message..." />
+  <button id="sendBtn">Send</button>
+
+  <div id="log" style="margin-top:20px; border:1px solid #ccc; padding:10px;">
+    <strong>Messages:</strong><br>
+  </div>
+
+  <script>
+    const log = document.getElementById("log");
+    const input = document.getElementById("messageInput");
+    const btn = document.getElementById("sendBtn");
+
+    // Connect to Django WebSocket
+    const ws = new WebSocket("ws://localhost:8000/ws/chat/testroom/");
+
+    ws.onopen = () => {
+      log.innerHTML += "<div>✅ Connected to WebSocket</div>";
+    };
+
+    ws.onmessage = (event) => {
+      log.innerHTML += `<div>📩 Received: ${event.data}</div>`;
+    };
+
+    ws.onclose = () => {
+      log.innerHTML += "<div>❌ Disconnected from WebSocket</div>";
+    };
+
+    btn.onclick = () => {
+      const msg = input.value;
+      ws.send(JSON.stringify({ text: msg }));
+      log.innerHTML += `<div>📤 Sent: ${msg}</div>`;
+      input.value = "";
+    };
+  </script>
+</body>
+</html>
