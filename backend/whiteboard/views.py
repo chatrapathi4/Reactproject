@@ -89,9 +89,59 @@ def update_profile(request):
 @csrf_exempt
 def create_board(request):
     if request.method == "POST":
-        board_id = str(uuid.uuid4())
-        board = Board.objects.create(name=f"Board-{board_id}")
-        return JsonResponse({"success": True, "board_id": board_id})
+        try:
+            data = json.loads(request.body)
+            board_name = data.get("name", f"Board-{uuid.uuid4().hex[:8]}")
+            
+            # Create new board with unique room code
+            board = Board.objects.create(name=board_name)
+            
+            return JsonResponse({
+                "success": True, 
+                "board_id": board.id,
+                "room_code": board.room_code,
+                "room_name": board.name
+            })
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "POST required"}, status=405)
 
-# Create your views here.
+@csrf_exempt
+def join_board(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            room_code = data.get("room_code", "").upper().strip()
+            
+            if not room_code:
+                return JsonResponse({"error": "Room code is required"}, status=400)
+            
+            # Find board by room code
+            try:
+                board = Board.objects.get(room_code=room_code, is_active=True)
+                return JsonResponse({
+                    "success": True,
+                    "board_id": board.id,
+                    "room_code": board.room_code,
+                    "room_name": board.name
+                })
+            except Board.DoesNotExist:
+                return JsonResponse({"error": "Invalid room code"}, status=404)
+                
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "POST required"}, status=405)
+
+@csrf_exempt
+def get_active_boards(request):
+    if request.method == "GET":
+        boards = Board.objects.filter(is_active=True).order_by('-created_at')[:20]
+        boards_data = [{
+            "id": board.id,
+            "name": board.name,
+            "room_code": board.room_code,
+            "created_at": board.created_at.isoformat()
+        } for board in boards]
+        
+        return JsonResponse({"boards": boards_data})
+    return JsonResponse({"error": "GET required"}, status=405)

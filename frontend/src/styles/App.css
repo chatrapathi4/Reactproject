@@ -1,0 +1,91 @@
+/* App.css - Global Styles */
+/* Cyberpunk color palette */
+:root {
+  --cp-bg: #18181b;
+  --cp-panel: #232136;
+  --cp-accent: #ff00cc;
+  --cp-accent2: #00fff7;
+  --cp-accent3: #fffb00;
+  --cp-text: #f8f8f2;
+  --cp-muted: #6e6a86;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+body, html, #root, .App {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Orbitron', 'Share Tech Mono', 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(120deg, #18181b 0%, #232136 100%);
+  color: var(--cp-text);
+  letter-spacing: 0.5px;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff00cc, #00fff7);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #00fff7, #ff00cc);
+}
+
+/* Selection */
+::selection {
+  background: rgba(0, 255, 247, 0.3);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: rgba(0, 255, 247, 0.3);
+  color: #ffffff;
+}
+
+/* Global button reset */
+button {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
