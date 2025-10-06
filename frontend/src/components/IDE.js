@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import QuickChat from './QuickChat';
 import ChatButton from './ChatButton';
 import '../styles/IDE.css';
+import { WS_BASE_URL } from '../config';
 
 function IDE({ ideId: propIdeId }) {
   const { ideId: urlIdeId } = useParams();
@@ -23,13 +24,13 @@ function IDE({ ideId: propIdeId }) {
   
   // Quick Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
-
+  
   const codeEditorRef = useRef(null);
 
   useEffect(() => {
     if (!ideId) return;
 
-    const ws = new WebSocket(`ws://localhost:8000/ws/ide/${ideId}/`);
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/ide/${ideId}/`);
     
     ws.onopen = () => {
       console.log('Connected to IDE WebSocket');

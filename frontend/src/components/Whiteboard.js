@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import QuickChat from './QuickChat';
 import ChatButton from './ChatButton';
 import '../styles/Whiteboard.css';
+import { WS_BASE_URL } from '../config';
 
 const Whiteboard = ({ roomName = 'default-room', roomCode: propRoomCode }) => {
   const canvasRef = useRef(null);
@@ -32,7 +33,7 @@ const Whiteboard = ({ roomName = 'default-room', roomCode: propRoomCode }) => {
     context.lineJoin = 'round';
     
     // Connect to WebSocket
-    const ws = new WebSocket(`ws://localhost:8000/ws/whiteboard/${roomName}/`);
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/whiteboard/${roomName}/`);
     wsRef.current = ws;
     
     ws.onopen = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/QuickChat.css';
+import { WS_BASE_URL } from '../config';
 
 const QuickChat = ({ roomId, roomType, username, isOpen, onToggle }) => {
   const [socket, setSocket] = useState(null);
@@ -22,7 +23,7 @@ const QuickChat = ({ roomId, roomType, username, isOpen, onToggle }) => {
 
     // Create a unique chat room for each whiteboard/IDE session
     const chatRoomId = `${roomType}_${roomId}_chat`;
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${chatRoomId}/`);
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/chat/${chatRoomId}/`);
     
     ws.onopen = () => {
       console.log('Connected to quick chat WebSocket');

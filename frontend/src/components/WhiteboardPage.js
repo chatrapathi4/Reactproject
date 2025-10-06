@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Whiteboard from './Whiteboard';
 import '../styles/WhiteboardPage.css';
+import { API_BASE_URL } from '../config';
 
 const WhiteboardPage = () => {
   const [roomCode, setRoomCode] = useState('');
@@ -16,7 +17,7 @@ const WhiteboardPage = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8000/api/board/create/', {
+      const response = await fetch(`${API_BASE_URL}/api/board/create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ const WhiteboardPage = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8000/api/board/join/', {
+      const response = await fetch(`${API_BASE_URL}/api/board/join/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

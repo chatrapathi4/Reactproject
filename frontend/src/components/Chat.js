@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import '../styles/Chat.css';
+import { WS_BASE_URL } from '../config';
 
 function Chat({ chatId: propChatId }) {
   const { chatId: urlChatId } = useParams();
@@ -25,8 +26,7 @@ function Chat({ chatId: propChatId }) {
 
   useEffect(() => {
     if (!chatId) return;
-
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${chatId}/`);
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/chat/${chatId}/`);
     
     ws.onopen = () => {
       console.log('Connected to chat WebSocket');
