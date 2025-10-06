@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-1nakg#wev@rq+*7da1i8)ssj05p*f32&wm%te9-apnyy0qj2o@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 
 
 # Application definition
@@ -145,6 +145,7 @@ CHANNEL_LAYERS = {
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
+    "https://reactproject.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
