@@ -89,3 +89,7 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Import Quick Chat styles */
+@import './QuickChat.css';
+@import './ChatButton.css';
+

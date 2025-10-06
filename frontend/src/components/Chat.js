@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useNavigateToSection } from './NavigationHelper';
+import { useParams } from 'react-router-dom';
 import '../styles/Chat.css';
 
-function Chat() {
-  const { chatId } = useParams();
-  const navigate = useNavigate();
-  const navigateToSection = useNavigateToSection();
+function Chat({ chatId: propChatId }) {
+  const { chatId: urlChatId } = useParams();
+  const chatId = propChatId || urlChatId;
+  
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -98,22 +97,6 @@ function Chat() {
     }
   };
 
-  const handleHomeClick = () => {
-    navigateToSection('home');
-  };
-
-  const handleAboutClick = () => {
-    navigateToSection('about');
-  };
-
-  const handleFeaturesClick = () => {
-    navigateToSection('features');
-  };
-
-  const handleContactClick = () => {
-    navigateToSection('contact');
-  };
-
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString();
   };
@@ -121,26 +104,6 @@ function Chat() {
   if (!hasJoined) {
     return (
       <div className="chat-container">
-        {/* Navigation Bar */}
-        <nav className="chat-navbar">
-          <div className="navbar-left">
-            <button onClick={handleHomeClick} className="logo-button">
-              CollabBoard
-            </button>
-          </div>
-          
-          <div className="navbar-center">
-            <span className="chat-title">Chat Room: {chatId}</span>
-          </div>
-          
-          <div className="navbar-right">
-            <button onClick={handleHomeClick} className="nav-btn">Home</button>
-            <button onClick={handleAboutClick} className="nav-btn">About</button>
-            <button onClick={handleFeaturesClick} className="nav-btn">Features</button>
-            <button onClick={handleContactClick} className="nav-btn">Contact</button>
-          </div>
-        </nav>
-
         {/* Join Form */}
         <div className="join-form">
           <div className="join-card">
@@ -178,26 +141,6 @@ function Chat() {
 
   return (
     <div className="chat-container">
-      {/* Navigation Bar */}
-      <nav className="chat-navbar">
-        <div className="navbar-left">
-          <button onClick={handleHomeClick} className="logo-button">
-            CollabBoard
-          </button>
-        </div>
-        
-        <div className="navbar-center">
-          <span className="chat-title">Chat: {chatId}</span>
-        </div>
-        
-        <div className="navbar-right">
-          <button onClick={handleHomeClick} className="nav-btn">Home</button>
-          <button onClick={handleAboutClick} className="nav-btn">About</button>
-          <button onClick={handleFeaturesClick} className="nav-btn">Features</button>
-          <button onClick={handleContactClick} className="nav-btn">Contact</button>
-        </div>
-      </nav>
-
       {/* Chat Interface */}
       <div className="chat-interface">
         {/* Users Panel */}

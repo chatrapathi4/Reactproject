@@ -220,3 +220,9 @@
   background: linear-gradient(180deg, var(--cp-accent), var(--cp-accent2));
   border-radius: 3px;
 }
+
+.copy-btn.copied,
+.copy-code-btn.copied {
+  background: linear-gradient(45deg, #00ff00, #00cc00);
+  transform: scale(1.05);
+}

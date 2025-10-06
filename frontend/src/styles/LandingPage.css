@@ -1,4 +1,4 @@
-/* Landing Page Styles */
+/* Landing Page Styles with Enhanced Backgrounds */
 .landing-page {
   overflow-x: hidden;
 }
@@ -9,14 +9,48 @@
   padding: 0 2rem;
 }
 
-/* Hero Section */
+/* Hero Section with Background */
 .hero-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
   position: relative;
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+  background: 
+    linear-gradient(135deg, 
+      rgba(12, 12, 12, 0.9) 0%, 
+      rgba(26, 26, 46, 0.85) 30%,
+      rgba(22, 33, 62, 0.9) 70%,
+      rgba(12, 12, 12, 0.95) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="%23ff00cc" stroke-width="1" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>'),
+    radial-gradient(circle at 20% 30%, rgba(255, 0, 128, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(0, 255, 255, 0.15) 0%, transparent 50%);
+  background-size: cover, 50px 50px, 800px 800px, 600px 600px;
+  background-position: center, center, 20% 30%, 80% 70%;
   overflow: hidden;
+  padding: 2rem 0;
+  position: relative;
+}
+
+/* Animated background elements */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%2300fff7" opacity="0.3"><animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="30" r="1.5" fill="%23ff00cc" opacity="0.5"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle><circle cx="60" cy="70" r="1" fill="%23fffb00" opacity="0.4"><animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/></circle><circle cx="30" cy="80" r="1.2" fill="%2300fff7" opacity="0.6"><animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/></circle></svg>') repeat;
+  background-size: 200px 200px;
+  animation: backgroundFloat 20s linear infinite;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@keyframes backgroundFloat {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(-200px) translateY(-200px); }
 }
 
 .hero-content {
@@ -25,15 +59,18 @@
   gap: 4rem;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
   z-index: 2;
   position: relative;
+  min-height: 80vh;
 }
 
 .hero-text {
   animation: slideInLeft 1s ease-out;
+  position: relative;
+  z-index: 3;
 }
 
 .hero-title {
@@ -43,6 +80,7 @@
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .gradient-text {
@@ -56,7 +94,8 @@
 
 .highlight-text {
   color: #ffffff;
-  font-weight: bold; /* removed glow blur */
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
 .hero-subtitle {
@@ -92,17 +131,19 @@
 .btn-primary {
   background: linear-gradient(45deg, #ff00cc, #00fff7);
   color: #000;
+  box-shadow: 0 4px 16px rgba(255, 0, 128, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  opacity: 0.9;
+  box-shadow: 0 8px 24px rgba(255, 0, 128, 0.6);
 }
 
 .btn-secondary {
-  background: #0c0c0c;
+  background: rgba(12, 12, 12, 0.8);
   color: #00fff7;
   border: 2px solid #00fff7;
+  backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
@@ -119,77 +160,258 @@
   transform: translateX(5px);
 }
 
-/* Hero Visual */
+/* About Section with Tech Background */
+.about-section {
+  padding: 8rem 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.95) 0%, 
+      rgba(22, 33, 62, 0.9) 50%,
+      rgba(12, 12, 12, 0.95) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23ff00cc;stop-opacity:0.1" /><stop offset="100%" style="stop-color:%2300fff7;stop-opacity:0.1" /></linearGradient></defs><rect width="200" height="200" fill="url(%23grad1)"/><circle cx="50" cy="50" r="20" fill="none" stroke="%2300fff7" stroke-width="1" opacity="0.2"/><circle cx="150" cy="150" r="30" fill="none" stroke="%23ff00cc" stroke-width="1" opacity="0.2"/><path d="M20,20 L180,180 M180,20 L20,180" stroke="%23fffb00" stroke-width="0.5" opacity="0.1"/></svg>') repeat;
+  background-size: cover, 400px 400px;
+  position: relative;
+}
+
+.about-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255, 0, 128, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Products Section with Circuit Background */
+.products-section {
+  padding: 8rem 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(22, 33, 62, 0.95) 0%, 
+      rgba(12, 12, 12, 0.9) 50%,
+      rgba(26, 26, 46, 0.95) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><defs><pattern id="circuit" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="transparent"/><circle cx="10" cy="10" r="2" fill="%2300fff7" opacity="0.3"/><circle cx="50" cy="50" r="2" fill="%23ff00cc" opacity="0.3"/><path d="M10,10 L30,10 L30,30 L50,30 L50,50" stroke="%2300fff7" stroke-width="1" opacity="0.2" fill="none"/><rect x="25" y="25" width="10" height="10" fill="none" stroke="%23fffb00" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100%" height="100%" fill="url(%23circuit)"/>'),
+    radial-gradient(circle at 30% 40%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+  background-size: cover, 300px 300px, 500px 500px;
+  position: relative;
+}
+
+/* Feedback Section with Data Visualization Background */
+.feedback-section {
+  padding: 8rem 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.95) 0%, 
+      rgba(22, 33, 62, 0.9) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%2300fff7;stop-opacity:0.1" /><stop offset="50%" style="stop-color:%23ff00cc;stop-opacity:0.05" /><stop offset="100%" style="stop-color:%23fffb00;stop-opacity:0.1" /></linearGradient></defs><rect width="400" height="400" fill="url(%23dataGrad)"/><path d="M50,300 Q100,250 150,280 T250,270 T350,250" stroke="%2300fff7" stroke-width="2" fill="none" opacity="0.3"/><path d="M50,320 Q120,280 180,300 T280,290 T350,270" stroke="%23ff00cc" stroke-width="2" fill="none" opacity="0.3"/><circle cx="100" cy="260" r="3" fill="%2300fff7" opacity="0.5"/><circle cx="200" cy="280" r="3" fill="%23ff00cc" opacity="0.5"/><circle cx="300" cy="250" r="3" fill="%23fffb00" opacity="0.5"/></svg>') no-repeat;
+  background-size: cover, 600px 600px;
+  background-position: center, center;
+  position: relative;
+}
+
+/* Contact Section with Network Background */
+.contact-section {
+  padding: 8rem 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(12, 12, 12, 0.95) 0%, 
+      rgba(26, 26, 46, 0.9) 50%,
+      rgba(22, 33, 62, 0.95) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><pattern id="network" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="3" fill="%2300fff7" opacity="0.4"/><circle cx="80" cy="30" r="2" fill="%23ff00cc" opacity="0.4"/><circle cx="50" cy="70" r="2.5" fill="%23fffb00" opacity="0.4"/><circle cx="30" cy="90" r="2" fill="%2300fff7" opacity="0.4"/><line x1="20" y1="20" x2="80" y2="30" stroke="%2300fff7" stroke-width="0.5" opacity="0.2"/><line x1="80" y1="30" x2="50" y2="70" stroke="%23ff00cc" stroke-width="0.5" opacity="0.2"/><line x1="50" y1="70" x2="30" y2="90" stroke="%23fffb00" stroke-width="0.5" opacity="0.2"/><line x1="30" y1="90" x2="20" y2="20" stroke="%2300fff7" stroke-width="0.5" opacity="0.2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23network)"/>'),
+    radial-gradient(circle at 70% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 40%);
+  background-size: cover, 200px 200px, 400px 400px;
+  position: relative;
+}
+
+/* Integration Section Background */
+.integration-section {
+  margin-top: 6rem;
+  padding: 4rem 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 0, 128, 0.05) 0%, 
+      rgba(0, 255, 255, 0.05) 100%
+    ),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200"><defs><linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:%23ff00cc;stop-opacity:0.1" /><stop offset="25%" style="stop-color:%2300fff7;stop-opacity:0.1" /><stop offset="50%" style="stop-color:%23fffb00;stop-opacity:0.1" /><stop offset="75%" style="stop-color:%23ff00cc;stop-opacity:0.1" /><stop offset="100%" style="stop-color:%2300fff7;stop-opacity:0.1" /></linearGradient></defs><rect width="600" height="200" fill="url(%23flowGrad)"/><path d="M50,100 L150,100 M200,100 L300,100 M350,100 L450,100 M500,100 L550,100" stroke="%2300fff7" stroke-width="2" opacity="0.3"/><polygon points="140,90 150,100 140,110" fill="%2300fff7" opacity="0.3"/><polygon points="290,90 300,100 290,110" fill="%2300fff7" opacity="0.3"/><polygon points="440,90 450,100 440,110" fill="%2300fff7" opacity="0.3"/></svg>') no-repeat;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  background-size: cover, 100% 100%;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.integration-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(0, 255, 255, 0.1) 50%, 
+    transparent 100%);
+  animation: flowAnimation 4s ease-in-out infinite;
+}
+
+@keyframes flowAnimation {
+  0% { left: -100%; }
+  50% { left: 0%; }
+  100% { left: 100%; }
+}
+
+/* Enhanced Floating Cards with Better Visibility */
 .hero-visual {
   animation: slideInRight 1s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  position: relative;
 }
 
 .floating-cards {
   position: relative;
-  height: 400px;
+  width: 100%;
+  height: 500px;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .card {
   position: absolute;
-  background: #111827; /* solid */
-  border: 1px solid #333;
+  background: linear-gradient(135deg, 
+    rgba(255, 0, 128, 0.15) 0%, 
+    rgba(0, 255, 255, 0.15) 100%);
+  border: 2px solid rgba(0, 255, 255, 0.4);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
-  animation: float 3s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  min-width: 140px;
+  max-width: 160px;
+  z-index: 1;
 }
 
+.card:hover {
+  transform: translateY(-8px) scale(1.05);
+  border-color: var(--cp-accent);
+  box-shadow: 0 16px 48px rgba(255, 0, 128, 0.5);
+  z-index: 2;
+}
+
+/* Improved positioning for better visibility */
 .card-1 {
-  top: 0;
-  left: 0;
+  top: 30px;
+  left: 30px;
   animation-delay: 0s;
 }
 
 .card-2 {
-  top: 50px;
-  right: 0;
-  animation-delay: 1s;
+  top: 80px;
+  right: 20px;
+  animation-delay: 1.5s;
 }
 
 .card-3 {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  animation-delay: 2s;
+  bottom: 100px;
+  left: 60px;
+  animation-delay: 3s;
+}
+
+.card-4 {
+  bottom: 50px;
+  right: 60px;
+  animation-delay: 4.5s;
 }
 
 .card-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+  display: block;
+  filter: drop-shadow(0 0 10px currentColor);
 }
 
 .card h3 {
-  color: #fff;
-  font-size: 1.5rem;
+  color: var(--cp-text);
+  font-size: 1.1rem;
   margin: 0;
+  font-weight: 600;
+  text-shadow: 0 0 10px var(--cp-accent2);
 }
 
-/* Hero Background */
-.hero-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
+/* Enhanced floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-20px) rotate(1deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-15px) rotate(0deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-25px) rotate(-1deg);
+    opacity: 0.95;
+  }
 }
 
-.cyber-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    linear-gradient(#1e293b 1px, transparent 1px),
-    linear-gradient(90deg, #1e293b 1px, transparent 1px);
-  background-size: 50px 50px;
-  /* removed blur + movement */
+/* Alternative floating patterns */
+.card-2 {
+  animation-name: float-alt;
+}
+
+.card-4 {
+  animation-name: float-alt-2;
+}
+
+@keyframes float-alt {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-18px) rotate(-1deg);
+  }
+  66% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+}
+
+@keyframes float-alt-2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-22px) rotate(1.5deg);
+  }
+  80% {
+    transform: translateY(-8px) rotate(-0.5deg);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* About Section */
@@ -298,6 +520,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
+  margin-bottom: 4rem;
 }
 
 .product-card {
@@ -316,7 +539,60 @@
 }
 
 .product-card.featured {
-  border: 2px solid #ff00cc;
+  border: 2px solid var(--cp-accent);
+  background: linear-gradient(135deg, 
+    rgba(255, 0, 128, 0.05) 0%, 
+    rgba(0, 255, 255, 0.05) 100%);
+}
+
+.product-card.premium {
+  border: 2px solid var(--cp-accent3);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 0, 0.05) 0%, 
+    rgba(255, 0, 128, 0.05) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card.premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 0, 0.1) 50%, 
+    transparent 100%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.product-card.coming-soon {
+  opacity: 0.7;
+  position: relative;
+}
+
+.product-card.coming-soon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.05) 10px,
+    rgba(255, 255, 255, 0.05) 20px
+  );
+  pointer-events: none;
 }
 
 .product-badge {
@@ -330,6 +606,26 @@
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.product-badge.premium-badge {
+  background: linear-gradient(45deg, var(--cp-accent3), var(--cp-accent2));
+  color: var(--cp-bg);
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+.product-badge.coming-soon-badge {
+  background: linear-gradient(45deg, #666, #999);
+  color: white;
+}
+
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 5px var(--cp-accent3);
+  }
+  100% {
+    box-shadow: 0 0 20px var(--cp-accent3), 0 0 30px var(--cp-accent3);
+  }
 }
 
 .product-icon {
@@ -386,13 +682,53 @@
 }
 
 .product-btn.primary {
-  background: linear-gradient(45deg, #ff00cc, #00fff7);
-  color: #000;
+  background: linear-gradient(45deg, var(--cp-accent), var(--cp-accent2));
+  color: var(--cp-bg);
   border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.product-btn.primary:hover {
-  transform: scale(1.05);
+.product-btn.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+  transition: left 0.5s ease;
+}
+
+.product-btn.primary:hover::before {
+  left: 100%;
+}
+
+.product-btn.premium-btn {
+  background: linear-gradient(45deg, var(--cp-accent3), var(--cp-accent2));
+  color: var(--cp-bg);
+  border: none;
+  box-shadow: 0 4px 16px rgba(255, 255, 0, 0.3);
+}
+
+.product-btn.premium-btn:hover {
+  box-shadow: 0 8px 24px rgba(255, 255, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.product-btn.disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.product-btn.disabled:hover {
+  transform: none;
+  background: #666;
 }
 
 /* Feedback Section */
@@ -670,60 +1006,101 @@
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
-  .form-select {
-    padding: 0.8rem;
-    font-size: 1rem;
+  .hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
   }
   
-  .select-wrapper::after {
-    right: 0.8rem;
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+  }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .integration-flow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .flow-arrow {
+    transform: rotate(90deg);
+    font-size: 1.5rem;
+  }
+  
+  .flow-step {
+    min-width: 100%;
+    padding: 1.5rem;
+  }
+  
+  .integration-section h3 {
+    font-size: 1.8rem;
   }
 }
 
 @media (max-width: 480px) {
-  .form-select {
-    padding: 0.7rem;
-    font-size: 0.9rem;
+  .product-card {
+    padding: 2rem;
   }
   
-  .select-wrapper::after {
-    right: 0.7rem;
-    font-size: 0.7rem;
+  .integration-section {
+    margin-top: 3rem;
+    padding: 2rem 1rem;
+  }
+  
+  .flow-step {
+    padding: 1rem;
+  }
+  
+  .step-icon {
+    font-size: 2rem;
   }
 }
 
-/* Focus states for accessibility */
-.form-select:focus-visible {
-  outline: 2px solid var(--cp-accent);
-  outline-offset: 2px;
+/* Update these styles in the hero section */
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px; /* Increased max-width */
+  margin: 0 auto;
+  padding: 2rem;
+  z-index: 2;
+  position: relative;
+  min-height: 80vh; /* Added min-height */
 }
 
-/* Animation for dropdown opening */
-.form-select[aria-expanded="true"] {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: 
-    0 0 0 3px rgba(255, 0, 128, 0.1),
-    0 8px 24px rgba(255, 0, 128, 0.3);
-}
-
-/* Loading state */
-.form-select.loading {
-  background-image: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(0, 255, 255, 0.2) 50%, 
-    transparent 100%);
-  background-size: 200% 100%;
-  animation: loading-shimmer 1.5s infinite;
-}
-
-@keyframes loading-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  padding: 2rem 0; /* Added padding */
 }
 
 /* Animations */
@@ -746,27 +1123,6 @@
   to {
     opacity: 1;
     transform: translateX(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
   }
 }
 
@@ -798,4 +1154,232 @@
   .hero-buttons {
     justify-content: center;
   }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .integration-flow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .flow-arrow {
+    transform: rotate(90deg);
+    font-size: 1.5rem;
+  }
+  
+  .flow-step {
+    min-width: 100%;
+    padding: 1.5rem;
+  }
+  
+  .integration-section h3 {
+    font-size: 1.8rem;
+  }
 }
+
+@media (max-width: 480px) {
+  .product-card {
+    padding: 2rem;
+  }
+  
+  .integration-section {
+    margin-top: 3rem;
+    padding: 2rem 1rem;
+  }
+  
+  .flow-step {
+    padding: 1rem;
+  }
+  
+  .step-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Responsive Design Updates */
+@media (max-width: 1024px) {
+  .floating-cards {
+    height: 450px;
+    max-width: 450px;
+  }
+  
+  .card {
+    min-width: 130px;
+    max-width: 150px;
+    padding: 1.3rem;
+  }
+  
+  .card-1 {
+    top: 25px;
+    left: 25px;
+  }
+  
+  .card-2 {
+    top: 70px;
+    right: 15px;
+  }
+  
+  .card-3 {
+    bottom: 90px;
+    left: 50px;
+  }
+  
+  .card-4 {
+    bottom: 40px;
+    right: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .floating-cards {
+    height: 400px;
+    max-width: 350px;
+    margin-top: 2rem;
+  }
+  
+  .card {
+    min-width: 110px;
+    max-width: 130px;
+    padding: 1.2rem;
+  }
+  
+  .card-1 {
+    top: 20px;
+    left: 20px;
+  }
+  
+  .card-2 {
+    top: 60px;
+    right: 10px;
+  }
+  
+  .card-3 {
+    bottom: 80px;
+    left: 35px;
+  }
+  
+  .card-4 {
+    bottom: 30px;
+    right: 35px;
+  }
+  
+  .card-icon {
+    font-size: 2rem;
+  }
+  
+  .card h3 {
+    font-size: 1rem;
+  }
+  
+  /* Reduce background complexity on mobile */
+  .hero-section {
+    background-size: cover, 30px 30px, 400px 400px, 300px 300px;
+  }
+  
+  .about-section {
+    background-size: cover, 200px 200px;
+  }
+  
+  .products-section {
+    background-size: cover, 150px 150px, 250px 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-cards {
+    height: 350px;
+    max-width: 280px;
+  }
+  
+  .card {
+    min-width: 100px;
+    max-width: 120px;
+    padding: 1rem;
+  }
+  
+  .card-1 {
+    top: 15px;
+    left: 15px;
+  }
+  
+  .card-2 {
+    top: 50px;
+    right: 10px;
+  }
+  
+  .card-3 {
+    bottom: 70px;
+    left: 25px;
+  }
+  
+  .card-4 {
+    bottom: 20px;
+    right: 25px;
+  }
+  
+  .card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .card h3 {
+    font-size: 0.9rem;
+  }
+  
+  /* Reduce animation intensity on mobile */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(0.5deg);
+    }
+  }
+  
+  @keyframes float-alt {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-8px) rotate(-0.5deg);
+    }
+  }
+  
+  @keyframes float-alt-2 {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-12px) rotate(1deg);
+    }
+  }
+  
+  /* Simplify backgrounds on very small screens */
+  .hero-section,
+  .about-section,
+  .products-section,
+  .feedback-section,
+  .contact-section {
+    background-size: cover;
+  }
+  
+  .hero-section::before,
+  .about-section::before {
+    opacity: 0.3;
+  }
+}
+
+/* Keep all your existing styles for other sections like section-title, about-grid, products-grid, testimonials, etc. */

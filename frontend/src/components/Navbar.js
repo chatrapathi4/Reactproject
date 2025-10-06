@@ -22,11 +22,11 @@ function Navbar() {
         </div>
         
         <div className="navbar-center">
-          <a href="#home" className="navbar-link">Home</a>
-          <a href="#about" className="navbar-link">About</a>
-          <a href="#products" className="navbar-link">Products</a>
-          <a href="#feedback" className="navbar-link">Feedback</a>
-          <a href="#contact" className="navbar-link">Contact</a>
+          <a href="/#home" className="navbar-link">Home</a>
+          <a href="/#about" className="navbar-link">About</a>
+          <a href="/#products" className="navbar-link">Products</a>
+          <a href="/#feedback" className="navbar-link">Feedback</a>
+          <a href="/#contact" className="navbar-link">Contact</a>
         </div>
         
         <div className="navbar-right">

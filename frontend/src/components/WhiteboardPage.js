@@ -112,7 +112,7 @@ const WhiteboardPage = () => {
             🚪 Leave Room
           </button>
         </div>
-        <Whiteboard roomName={roomCode} />
+        <Whiteboard roomName={roomCode} roomCode={roomCode} />
       </div>
     );
   }

@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import QuickChat from './QuickChat';
+import ChatButton from './ChatButton';
 import '../styles/Whiteboard.css';
 
-const Whiteboard = ({ roomName = 'default-room' }) => {
+const Whiteboard = ({ roomName = 'default-room', roomCode: propRoomCode }) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentTool, setCurrentTool] = useState('pen');
@@ -11,8 +13,11 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
   const [users, setUsers] = useState([]);
   const [username] = useState(`User_${Math.floor(Math.random() * 1000)}`);
   const wsRef = useRef(null);
-  const [objects, setObjects] = useState([]);
+  const [drawingObjects, setDrawingObjects] = useState([]);
   const navigate = useNavigate();
+  
+  // Quick Chat state
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -43,7 +48,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
       const data = JSON.parse(event.data);
       
       if (data.type === 'update') {
-        setObjects(data.objects);
+        setDrawingObjects(data.objects);
         redrawCanvas(context, data.objects);
       } else if (data.type === 'user_list') {
         setUsers(data.users);
@@ -60,6 +65,15 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
       }
     };
   }, [roomName, username]);
+
+  // Redraw canvas with drawing objects
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      redrawCanvas(context, drawingObjects);
+    }
+  }, [drawingObjects]);
 
   const redrawCanvas = (context, objectsToRedraw) => {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -98,7 +112,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
       points: [{ x, y }]
     };
     
-    setObjects(prev => [...prev, newPath]);
+    setDrawingObjects(prev => [...prev, newPath]);
   };
 
   const draw = (e) => {
@@ -109,7 +123,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    setObjects(prev => {
+    setDrawingObjects(prev => {
       const newObjects = [...prev];
       const currentPath = newObjects[newObjects.length - 1];
       currentPath.points.push({ x, y });
@@ -131,7 +145,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
   };
 
   const clearCanvas = () => {
-    setObjects([]);
+    setDrawingObjects([]);
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: 'update',
@@ -140,8 +154,15 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     }
   };
 
-  const goBackToLanding = () => {
-    navigate('/');
+  const copyRoomCode = () => {
+    const codeToCopy = propRoomCode || roomName;
+    navigator.clipboard.writeText(codeToCopy);
+    // You could add a toast notification here
+    alert('Room code copied to clipboard!');
+  };
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   const tools = [
@@ -218,6 +239,12 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
             ))}
           </div>
         </div>
+
+        <div className="toolbar-section">
+          <button className="copy-btn" onClick={copyRoomCode}>
+            📋 Copy Room Code
+          </button>
+        </div>
       </div>
       
       <div className="canvas-container">
@@ -230,6 +257,21 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
           onMouseLeave={stopDrawing}
         />
       </div>
+
+      {/* Chat Button */}
+      <ChatButton 
+        onClick={toggleChat}
+        isOpen={isChatOpen}
+      />
+
+      {/* Quick Chat */}
+      <QuickChat
+        roomId={roomName}
+        roomType="whiteboard"
+        username={username}
+        isOpen={isChatOpen}
+        onToggle={toggleChat}
+      />
     </div>
   );
 };
