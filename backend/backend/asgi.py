@@ -12,8 +12,8 @@ from whiteboard.consumers import WhiteboardConsumer
 
 websocket_urlpatterns = [
     path('ws/whiteboard/<str:room_name>/', WhiteboardConsumer.as_asgi()),
-    path('ws/chat/<str:room_name>/', WhiteboardConsumer.as_asgi()),  # Reuse same consumer for now
-    path('ws/ide/<str:room_name>/', WhiteboardConsumer.as_asgi()),   # Reuse same consumer for now
+    path('ws/chat/<str:room_name>/', WhiteboardConsumer.as_asgi()),
+    path('ws/ide/<str:room_name>/', WhiteboardConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({
