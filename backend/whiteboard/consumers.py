@@ -1,5 +1,8 @@
 import json
+import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
+from channels.db import database_sync_to_async
 
 CHAT_USERS = {}         # {chat_id: set(usernames)}
 WHITEBOARD_USERS = {}   # {room_name: set(usernames)}
@@ -69,8 +72,8 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
         await self.accept()
         self.username = None
 
-        # Send current state to the new user
-        objects = WHITEBOARD_STATE.get(self.room_name, [])
+        # Load state from cache
+        objects = await self.get_room_state()
         await self.send(text_data=json.dumps({
             "type": "update",
             "objects": objects
@@ -88,27 +91,44 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         if data.get("type") == "join":
             self.username = data.get("username")
-            if self.room_name not in WHITEBOARD_USERS:
-                WHITEBOARD_USERS[self.room_name] = set()
-            WHITEBOARD_USERS[self.room_name].add(self.username)
+            await self.add_user_to_room()
             await self.broadcast_user_list()
+        elif data.get("type") == "draw_path":
+            # Optimized drawing with path chunks
+            await self.handle_draw_path(data)
         elif data.get("type") == "update":
-            # Drawing update from a user
-            objects = data.get("objects", [])
-            WHITEBOARD_STATE[self.room_name] = objects
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "whiteboard_update",
-                    "objects": objects
-                }
-            )
+            # Batch updates for better performance
+            await self.handle_batch_update(data)
 
-    async def whiteboard_update(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "update",
-            "objects": event["objects"]
-        }))
+    async def handle_draw_path(self, data):
+        """Handle real-time drawing with path optimization"""
+        # Broadcast immediately for real-time feel
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "draw_path_update",
+                "path": data.get("path"),
+                "sender": self.channel_name
+            }
+        )
+
+    async def draw_path_update(self, event):
+        """Send real-time drawing updates"""
+        if event["sender"] != self.channel_name:
+            await self.send(text_data=json.dumps({
+                "type": "draw_path",
+                "path": event["path"]
+            }))
+
+    async def get_room_state(self):
+        """Get room state from Redis cache"""
+        cache_key = f"whiteboard_state_{self.room_name}"
+        return cache.get(cache_key, [])
+
+    async def save_room_state(self, objects):
+        """Save room state to Redis cache"""
+        cache_key = f"whiteboard_state_{self.room_name}"
+        cache.set(cache_key, objects, timeout=3600)  # 1 hour
 
     async def broadcast_user_list(self):
         await self.channel_layer.group_send(
