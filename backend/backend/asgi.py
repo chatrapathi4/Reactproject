@@ -3,17 +3,17 @@ import django
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from django.core.asgi import get_asgi_application
-from django.urls import re_path
+from django.urls import path
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 
-from whiteboard.consumers import UltraFastWhiteboardConsumer, UltraFastChatConsumer
+from whiteboard.consumers import WhiteboardConsumer
 
 websocket_urlpatterns = [
-    re_path(r'ws/whiteboard/(?P<room_name>\w+)/$', UltraFastWhiteboardConsumer.as_asgi()),
-    re_path(r'ws/chat/(?P<room_name>\w+)/$', UltraFastChatConsumer.as_asgi()),
-    re_path(r'ws/ide/(?P<ide_id>\w+)/$', UltraFastChatConsumer.as_asgi()),
+    path('ws/whiteboard/<str:room_name>/', WhiteboardConsumer.as_asgi()),
+    path('ws/chat/<str:room_name>/', WhiteboardConsumer.as_asgi()),  # Reuse same consumer for now
+    path('ws/ide/<str:room_name>/', WhiteboardConsumer.as_asgi()),   # Reuse same consumer for now
 ]
 
 application = ProtocolTypeRouter({

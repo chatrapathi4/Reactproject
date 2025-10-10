@@ -7,6 +7,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Profile, Board
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def api_login(request):
@@ -88,13 +91,16 @@ def update_profile(request):
 
 @csrf_exempt
 def create_board(request):
+    logger.info(f"create_board called with method: {request.method}")
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            logger.info(f"Received data: {data}")
             board_name = data.get("name", f"Board-{uuid.uuid4().hex[:8]}")
             
             # Create new board with unique room code
             board = Board.objects.create(name=board_name)
+            logger.info(f"Created board: {board.room_code}")
             
             return JsonResponse({
                 "success": True, 
@@ -103,6 +109,7 @@ def create_board(request):
                 "room_name": board.name
             })
         except Exception as e:
+            logger.error(f"Error creating board: {e}")
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "POST required"}, status=405)
 
@@ -145,3 +152,11 @@ def get_active_boards(request):
         
         return JsonResponse({"boards": boards_data})
     return JsonResponse({"error": "GET required"}, status=405)
+@csrf_exempt
+def api_test(request):
+    """Simple test endpoint to verify API is working"""
+    return JsonResponse({
+        "success": True,
+        "message": "API is working!",
+        "method": request.method
+    })
