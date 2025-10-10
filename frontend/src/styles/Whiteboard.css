@@ -36,9 +36,9 @@
 }
 
 .tool-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
 .tool-btn {
@@ -170,6 +170,61 @@
 
 .whiteboard-canvas:hover {
   border-color: rgba(255, 0, 128, 0.4);
+}
+
+/* Add these new styles */
+.room-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.action-btn {
+  background: linear-gradient(45deg, var(--cp-accent3), var(--cp-accent2));
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: var(--cp-bg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.4);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.save-btn {
+  background: linear-gradient(45deg, #00ff88, #00cc66);
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.4);
+}
+
+.text-input-overlay input {
+  background: rgba(0, 0, 0, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  padding: 0.25rem;
+  border-radius: 4px;
 }
 
 /* Responsive Design */
