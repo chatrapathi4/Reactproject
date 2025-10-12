@@ -17,6 +17,8 @@ const WhiteboardPage = () => {
     setError('');
     
     try {
+      console.log('Creating board with URL:', `${API_BASE_URL}/api/board/create/`);
+      
       const response = await fetch(`${API_BASE_URL}/api/board/create/`, {
         method: 'POST',
         headers: {
@@ -27,7 +29,11 @@ const WhiteboardPage = () => {
         })
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (data.success) {
         setRoomCode(data.room_code);
@@ -38,8 +44,8 @@ const WhiteboardPage = () => {
         setError(data.error || 'Failed to create room');
       }
     } catch (err) {
+      console.error('Full error:', err);
       setError('Network error. Please try again.');
-      console.error('Error creating room:', err);
     } finally {
       setLoading(false);
     }

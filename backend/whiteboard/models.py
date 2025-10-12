@@ -30,6 +30,6 @@ class Profile(models.Model):
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True)
-
+    
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username}'s Profile"

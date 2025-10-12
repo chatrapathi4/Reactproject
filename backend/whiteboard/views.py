@@ -2,10 +2,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
-import json
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.db.models.signals import post_save  # Add this import
+from django.dispatch import receiver             # Add this import
 from .models import Profile, Board
+import json
 import uuid
 import logging
 
@@ -47,7 +47,6 @@ def api_logout(request):
     return JsonResponse({"error": "POST required"}, status=405)
 
 def google_login(request):
-    # Placeholder for Google OAuth login
     return HttpResponseRedirect("https://accounts.google.com/")
 
 @receiver(post_save, sender=User)
@@ -91,16 +90,19 @@ def update_profile(request):
 
 @csrf_exempt
 def create_board(request):
-    logger.info(f"create_board called with method: {request.method}")
+    print(f"create_board called - Method: {request.method}")
+    print(f"Request path: {request.path}")
+    
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            logger.info(f"Received data: {data}")
-            board_name = data.get("name", f"Board-{uuid.uuid4().hex[:8]}")
+            print(f"Received data: {data}")
             
-            # Create new board with unique room code
+            board_name = data.get("name", f"Board-{Board.objects.count() + 1}")
+            
+            # Create board
             board = Board.objects.create(name=board_name)
-            logger.info(f"Created board: {board.room_code}")
+            print(f"Created board: {board.name} with code: {board.room_code}")
             
             return JsonResponse({
                 "success": True, 
@@ -109,8 +111,10 @@ def create_board(request):
                 "room_name": board.name
             })
         except Exception as e:
-            logger.error(f"Error creating board: {e}")
+            print(f"Error: {e}")
             return JsonResponse({"error": str(e)}, status=500)
+    
+    print("Invalid method")
     return JsonResponse({"error": "POST required"}, status=405)
 
 @csrf_exempt
@@ -152,11 +156,13 @@ def get_active_boards(request):
         
         return JsonResponse({"boards": boards_data})
     return JsonResponse({"error": "GET required"}, status=405)
+
 @csrf_exempt
 def api_test(request):
-    """Simple test endpoint to verify API is working"""
+    print(f"API test called - Method: {request.method}, Path: {request.path}")
     return JsonResponse({
         "success": True,
         "message": "API is working!",
-        "method": request.method
+        "method": request.method,
+        "path": request.path
     })
