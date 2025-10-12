@@ -74,17 +74,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 ASGI_APPLICATION = "backend.asgi.application"
 
-# Database Configuration
-if IS_PRODUCTION:
-    # Production database
+# Database Configuration - Fixed
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Production database (PostgreSQL from Render)
     DATABASES = {
         'default': dj_database_url.config(
+            default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
 else:
-    # Local development database
+    # Local development database (SQLite)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -93,13 +96,15 @@ else:
     }
 
 # Channel Layers Configuration
-if IS_PRODUCTION:
+REDIS_URL = os.environ.get('REDIS_URL')
+
+if REDIS_URL:
     # Production - Use Redis
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+                "hosts": [REDIS_URL],
                 "capacity": 1500,
                 "expiry": 60,
             },
@@ -128,7 +133,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend_build', 'static'),
 ]
 
-if IS_PRODUCTION:
+if DATABASE_URL:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Other settings
@@ -144,3 +149,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Add media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -28,6 +28,8 @@ urlpatterns = [
     
     # Serve React app only for root path
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    # Catch-all for React routing (must be last)
+    re_path(r'^(?!api/|admin/|static/|media/).*/$', TemplateView.as_view(template_name='index.html')),
 ]
 
 # Add static files for development
