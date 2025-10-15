@@ -118,6 +118,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Static files configuration - FIXED
 STATIC_URL = '/static/'
+
+# Static files configuration - FIXED
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files directories
@@ -125,8 +127,18 @@ STATICFILES_DIRS = []
 if os.path.exists(os.path.join(BASE_DIR, 'frontend_build', 'static')):
     STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'frontend_build', 'static'))
 
+# --- ADDED: Ensure frontend build root is also served by WhiteNoise so
+# manifest.json, favicon, logo192.png, logo512.png, index.html are available
+if os.path.exists(os.path.join(BASE_DIR, 'frontend_build')):
+    # allow WhiteNoise to serve files placed directly in frontend_build/
+    STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'frontend_build'))
+    WHITENOISE_ROOT = os.path.join(BASE_DIR, 'frontend_build')
+
 # Static files storage
 if DATABASE_URL:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+else:
+    # In development keep default; in production WhiteNoise will use WHITENOISE_ROOT
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # WhiteNoise configuration

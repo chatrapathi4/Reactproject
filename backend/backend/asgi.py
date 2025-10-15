@@ -1,23 +1,18 @@
 import os
-import django
+from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from django.core.asgi import get_asgi_application
-from django.urls import path
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
-django.setup()
 
-from whiteboard.consumers import WhiteboardConsumer
+# Keep Django ASGI app for HTTP
+django_asgi_app = get_asgi_application()
 
-websocket_urlpatterns = [
-    path('ws/whiteboard/<str:room_name>/', WhiteboardConsumer.as_asgi()),
-    path('ws/chat/<str:room_name>/', WhiteboardConsumer.as_asgi()),
-    path('ws/ide/<str:room_name>/', WhiteboardConsumer.as_asgi()),
-]
+# Import websocket_urlpatterns from the whiteboard app routing
+from whiteboard.routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(websocket_urlpatterns)
     ),
