@@ -33,51 +33,83 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
   useEffect(() => {
     if (!roomName) return;
 
+    // Reuse existing connection if already connected to this room
+    if (wsRef.current &&
+        wsRef.current.url?.includes(`/ws/whiteboard/${roomName}/`) &&
+        wsRef.current.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    // Close previous socket if present
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+      try { wsRef.current.close(); } catch (e) {}
+    }
+
+    // client id for local dedupe (optional)
+    const clientId = `c_${Math.floor(Math.random() * 1e9)}`;
+
     const ws = new WebSocket(`${WS_BASE_URL}/ws/whiteboard/${roomName}/`);
     wsRef.current = ws;
-    
+    let joined = false;
+
     ws.onopen = () => {
       console.log('Connected to whiteboard');
-      ws.send(JSON.stringify({
-        type: 'join',
-        username: username
-      }));
-    };
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('Received:', data);
-      
-      switch (data.type) {
-        case 'live_stroke':
-          drawRemoteStroke(data.stroke);
-          break;
-        case 'object_added':
-          setDrawingObjects(prev => [...prev, data.object]);
-          break;
-        case 'canvas_cleared':
-          setDrawingObjects([]);
-          clearCanvas();
-          break;
-        case 'user_list':
-          setUsers(data.users);
-          break;
-        case 'user_joined':
-          console.log(`${data.username} joined`);
-          break;
+      // send join only once per connection
+      if (!joined) {
+        ws.send(JSON.stringify({ type: 'join', username, clientId }));
+        joined = true;
       }
     };
-    
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // dedupe user_joined locally
+        if (data.type === 'user_joined') {
+          setUsers(prev => (prev.includes(data.username) ? prev : [...prev, data.username]));
+          console.log(`${data.username} joined`);
+          return;
+        }
+
+        // normal handling
+        console.log('Received:', data);
+        switch (data.type) {
+          case 'live_stroke':
+            drawRemoteStroke(data.stroke);
+            break;
+          case 'object_added':
+            setDrawingObjects(prev => [...prev, data.object]);
+            break;
+          case 'canvas_cleared':
+            setDrawingObjects([]);
+            clearCanvas();
+            break;
+          case 'user_list':
+            setUsers(data.users);
+            break;
+          default:
+            break;
+        }
+      } catch (err) {
+        console.error('WS message parse error', err, event.data);
+      }
+    };
+
     ws.onclose = () => {
       console.log('Disconnected from whiteboard');
+      if (wsRef.current === ws) wsRef.current = null;
     };
-    
+
+    ws.onerror = (err) => {
+      console.error('Whiteboard socket error', err);
+    };
+
     return () => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
+      try { ws.close(); } catch (e) {}
+      if (wsRef.current === ws) wsRef.current = null;
     };
-  }, [roomName, username]);
+  }, [roomName]); // <- remove username so changing local username doesn't recreate socket
 
   // Canvas setup
   useEffect(() => {

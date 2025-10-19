@@ -16,6 +16,7 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
+            print(f"[WhiteboardConsumer] receive from {self.channel_name}: {data}")  # LOG
             message_type = data.get("type")
             
             if message_type == "join":
