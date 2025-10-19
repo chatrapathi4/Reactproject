@@ -1,6 +1,11 @@
 import json
-import asyncio
+from collections import defaultdict
 from channels.generic.websocket import AsyncWebsocketConsumer
+import logging
+
+# --- ADDED: in-memory maps for user presence (works for single-process dev)
+ROOM_USERS = defaultdict(set)          # room_group_name -> set(usernames)
+CHANNEL_USER = {}                      # channel_name -> (room_group_name, username)
 
 class WhiteboardConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -11,6 +16,21 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        # Remove mapping and broadcast updated user list
+        info = CHANNEL_USER.pop(self.channel_name, None)
+        if info:
+            room, username = info
+            ROOM_USERS[room].discard(username)
+            # notify others user left
+            await self.channel_layer.group_send(
+                room,
+                {"type": "user_left", "username": username, "sender_channel": self.channel_name}
+            )
+            # send updated list
+            await self.channel_layer.group_send(
+                room,
+                {"type": "user_list", "users": list(ROOM_USERS[room]), "sender_channel": self.channel_name}
+            )
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
@@ -20,14 +40,30 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
             message_type = data.get("type")
             
             if message_type == "join":
+                username = data.get("username") or f"User_{self.channel_name[-4:]}"
+                # persist mapping
+                CHANNEL_USER[self.channel_name] = (self.room_group_name, username)
+                ROOM_USERS[self.room_group_name].add(username)
+
+                # notify group that a user joined
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         "type": "user_joined",
-                        "username": data.get("username"),
+                        "username": username,
                         "sender_channel": self.channel_name
                     }
                 )
+                # also send authoritative user list (to everyone)
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "user_list",
+                        "users": list(ROOM_USERS[self.room_group_name]),
+                        "sender_channel": self.channel_name
+                    }
+                )
+
             elif message_type == "draw_stroke":
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -73,6 +109,21 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
                 "username": event["username"]
             }))
 
+    async def user_left(self, event):
+        # inform clients about the leave (clients may ignore if they prefer authoritative list)
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({
+                "type": "user_left",
+                "username": event.get("username")
+            }))
+
+    async def user_list(self, event):
+        # authoritative list broadcast to everyone (including the sender)
+        await self.send(text_data=json.dumps({
+            "type": "user_list",
+            "users": event.get("users", [])
+        }))
+
     async def drawing_update(self, event):
         if event["sender_channel"] != self.channel_name:
             await self.send(text_data=json.dumps({
@@ -95,12 +146,10 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
             }))
 
     async def canvas_cleared(self, event):
-        if event["sender_channel"] != self.channel_name:
-            await self.send(text_data=json.dumps({
-                "type": "canvas_cleared"
-            }))
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"canvas_cleared"}))
 
-# --- ADD: IDEConsumer ---
+# --- APPLY SAME PRESENCE LOGIC TO IDEConsumer and ChatConsumer (copy pattern) ---
 class IDEConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.ide_id = self.scope["url_route"]["kwargs"].get("ide_id")
@@ -109,6 +158,12 @@ class IDEConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        info = CHANNEL_USER.pop(self.channel_name, None)
+        if info:
+            room, username = info
+            ROOM_USERS[room].discard(username)
+            await self.channel_layer.group_send(room, {"type":"user_left","username": username, "sender_channel": self.channel_name})
+            await self.channel_layer.group_send(room, {"type":"user_list","users": list(ROOM_USERS[room]), "sender_channel": self.channel_name})
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
@@ -116,53 +171,44 @@ class IDEConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             t = data.get("type")
             if t == "join":
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "type": "user_joined",
-                    "username": data.get("username"),
-                    "sender_channel": self.channel_name
-                })
+                username = data.get("username") or f"User_{self.channel_name[-4:]}"
+                CHANNEL_USER[self.channel_name] = (self.room_group_name, username)
+                ROOM_USERS[self.room_group_name].add(username)
+                await self.channel_layer.group_send(self.room_group_name, {"type":"user_joined","username": username, "sender_channel": self.channel_name})
+                await self.channel_layer.group_send(self.room_group_name, {"type":"user_list","users": list(ROOM_USERS[self.room_group_name]), "sender_channel": self.channel_name})
             elif t in ("code_update", "file_change", "output", "run_complete"):
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "type": t,
-                    "payload": data,
-                    "sender_channel": self.channel_name
-                })
+                await self.channel_layer.group_send(self.room_group_name, {"type": t, "payload": data, "sender_channel": self.channel_name})
         except Exception as e:
             print(f"IDEConsumer error: {e}")
 
     async def user_joined(self, event):
-        if event["sender_channel"] != self.channel_name:
+        if event.get("sender_channel") != self.channel_name:
             await self.send(text_data=json.dumps({"type":"user_joined","username": event["username"]}))
 
+    async def user_left(self, event):
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"user_left","username": event.get("username")}))
+
+    async def user_list(self, event):
+        await self.send(text_data=json.dumps({"type":"user_list","users": event.get("users", [])}))
+
     async def code_update(self, event):
-        if event["sender_channel"] != self.channel_name:
-            await self.send(text_data=json.dumps({
-                "type":"code_update",
-                "code": event["payload"].get("code"),
-                "file": event["payload"].get("file")
-            }))
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"code_update","code": event["payload"].get("code"), "file": event["payload"].get("file")}))
 
     async def file_change(self, event):
-        if event["sender_channel"] != self.channel_name:
-            await self.send(text_data=json.dumps({
-                "type":"file_change",
-                "file": event["payload"].get("file"),
-                "code": event["payload"].get("code")
-            }))
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"file_change","file": event["payload"].get("file"), "code": event["payload"].get("code")}))
 
     async def output(self, event):
-        if event["sender_channel"] != self.channel_name:
-            await self.send(text_data=json.dumps({
-                "type":"output",
-                "output": event["payload"].get("output")
-            }))
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"output","output": event["payload"].get("output")}))
 
     async def run_complete(self, event):
-        if event["sender_channel"] != self.channel_name:
+        if event.get("sender_channel") != self.channel_name:
             await self.send(text_data=json.dumps({"type":"run_complete"}))
 
 
-# --- ADD: ChatConsumer ---
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.chat_id = self.scope["url_route"]["kwargs"].get("chat_id")
@@ -171,6 +217,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        info = CHANNEL_USER.pop(self.channel_name, None)
+        if info:
+            room, username = info
+            ROOM_USERS[room].discard(username)
+            await self.channel_layer.group_send(room, {"type":"user_left","username": username, "sender_channel": self.channel_name})
+            await self.channel_layer.group_send(room, {"type":"user_list","users": list(ROOM_USERS[room]), "sender_channel": self.channel_name})
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
@@ -178,24 +230,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             t = data.get("type")
             if t == "join":
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "type": "user_joined",
-                    "username": data.get("username"),
-                    "sender_channel": self.channel_name
-                })
+                username = data.get("username") or f"User_{self.channel_name[-4:]}"
+                CHANNEL_USER[self.channel_name] = (self.room_group_name, username)
+                ROOM_USERS[self.room_group_name].add(username)
+                await self.channel_layer.group_send(self.room_group_name, {"type":"user_joined","username": username, "sender_channel": self.channel_name})
+                await self.channel_layer.group_send(self.room_group_name, {"type":"user_list","users": list(ROOM_USERS[self.room_group_name]), "sender_channel": self.channel_name})
             elif t == "chat":
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "type": "chat_message",
-                    "message": data.get("message"),
-                    "sender_channel": self.channel_name
-                })
+                await self.channel_layer.group_send(self.room_group_name, {"type":"chat_message","message": data.get("message"), "sender_channel": self.channel_name})
         except Exception as e:
             print(f"ChatConsumer error: {e}")
 
     async def user_joined(self, event):
-        if event["sender_channel"] != self.channel_name:
+        if event.get("sender_channel") != self.channel_name:
             await self.send(text_data=json.dumps({"type":"user_joined","username": event["username"]}))
 
+    async def user_left(self, event):
+        if event.get("sender_channel") != self.channel_name:
+            await self.send(text_data=json.dumps({"type":"user_left","username": event.get("username")}))
+
+    async def user_list(self, event):
+        await self.send(text_data=json.dumps({"type":"user_list","users": event.get("users", [])}))
+
     async def chat_message(self, event):
-        if event["sender_channel"] != self.channel_name:
+        if event.get("sender_channel") != self.channel_name:
             await self.send(text_data=json.dumps({"type":"chat","message": event["message"]}))

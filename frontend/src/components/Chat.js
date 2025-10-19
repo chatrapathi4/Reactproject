@@ -26,37 +26,60 @@ function Chat({ chatId: propChatId }) {
 
   useEffect(() => {
     if (!chatId) return;
-    const ws = new WebSocket(`${WS_BASE_URL}/ws/chat/${chatId}/`);
-    
-    ws.onopen = () => {
-      console.log('Connected to chat WebSocket');
-      setIsConnected(true);
+
+    let isMounted = true;
+    let reconnectDelay = 1000;
+    let ws = null;
+    let shouldReconnect = true;
+
+    const connect = () => {
+      console.log('Attempting WS →', `${WS_BASE_URL}/ws/chat/${chatId}/`);
+      ws = new WebSocket(`${WS_BASE_URL}/ws/chat/${chatId}/`);
+
+      ws.onopen = () => {
+        console.log('Connected to chat WebSocket');
+        reconnectDelay = 1000;
+        setIsConnected(true);
+        setSocket(ws);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received:', data);
+          if (data.type === 'chat') {
+            setMessages(prev => [...prev, data.message]);
+          } else if (data.type === 'user_list') {
+            setUsers(data.users);
+          }
+        } catch (e) {
+          console.error('WS parse error', e, event.data);
+        }
+      };
+
+      ws.onclose = (ev) => {
+        console.warn('Chat WebSocket closed', ev);
+        setIsConnected(false);
+        setSocket(null);
+        if (shouldReconnect && isMounted) {
+          setTimeout(() => {
+            reconnectDelay = Math.min(10000, reconnectDelay * 1.5);
+            connect();
+          }, reconnectDelay);
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.error('WebSocket error:', err);
+      };
     };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('Received:', data);
-
-      if (data.type === 'chat') {
-        setMessages(prev => [...prev, data.message]);
-      } else if (data.type === 'user_list') {
-        setUsers(data.users);
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('Chat WebSocket connection closed');
-      setIsConnected(false);
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    setSocket(ws);
+    connect();
 
     return () => {
-      ws.close();
+      isMounted = false;
+      shouldReconnect = false;
+      try { ws && ws.close(); } catch (e) {}
     };
   }, [chatId]);
 
