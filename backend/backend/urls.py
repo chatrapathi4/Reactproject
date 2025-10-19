@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 # Import ALL the views we need
 from whiteboard.views import (
     api_login, api_register, google_login, api_logout, 
@@ -13,8 +14,7 @@ from whiteboard.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
-    # API endpoints FIRST - before any catch-all
+# API endpoints FIRST - before any catch-all
     path('api/test/', api_test, name='api_test'),
     path('api/login/', api_login, name='api_login'),
     path('api/register/', api_register, name='api_register'),
