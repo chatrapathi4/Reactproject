@@ -21,24 +21,23 @@ const QuickChat = ({ roomId, roomType, username, isOpen, onToggle }) => {
   useEffect(() => {
     if (!isOpen || !roomId || !username) return;
 
-    // Create a unique chat room for each whiteboard/IDE session
     const chatRoomId = `${roomType}_${roomId}_chat`;
+    const clientId = `qc_${Math.floor(Math.random()*1e9)}`;
     const ws = new WebSocket(`${WS_BASE_URL}/ws/chat/${chatRoomId}/`);
-    
+    let joined = false;
+
     ws.onopen = () => {
-      console.log('Connected to quick chat WebSocket');
+      console.log('Connected to quick chat WebSocket', chatRoomId, clientId);
       setIsConnected(true);
-      
-      // Auto-join with the provided username
-      ws.send(JSON.stringify({
-        type: 'join',
-        username: username
-      }));
+      setSocket(ws);
+      if (!joined) {
+        ws.send(JSON.stringify({ type: 'join', username, clientId }));
+        joined = true;
+      }
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      
       if (data.type === 'chat') {
         setMessages(prev => [...prev, data.message]);
       } else if (data.type === 'user_list') {
@@ -51,15 +50,12 @@ const QuickChat = ({ roomId, roomType, username, isOpen, onToggle }) => {
       setIsConnected(false);
     };
 
-    ws.onerror = (error) => {
-      console.error('Quick chat WebSocket error:', error);
+    ws.onerror = (err) => {
+      console.error('Quick chat WebSocket error:', err);
     };
 
     setSocket(ws);
-
-    return () => {
-      ws.close();
-    };
+    return () => ws.close();
   }, [isOpen, roomId, roomType, username]);
 
   const sendMessage = () => {

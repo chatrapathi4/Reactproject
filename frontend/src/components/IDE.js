@@ -30,11 +30,17 @@ function IDE({ ideId: propIdeId }) {
   useEffect(() => {
     if (!ideId) return;
 
+    const clientId = `ide_${Math.floor(Math.random()*1e9)}`;
     const ws = new WebSocket(`${WS_BASE_URL}/ws/ide/${ideId}/`);
-    
+    let joined = false;
+
     ws.onopen = () => {
-      console.log('Connected to IDE WebSocket');
+      console.log('Connected to IDE WebSocket', ideId, clientId);
       setIsConnected(true);
+      if (!joined) {
+        ws.send(JSON.stringify({ type: 'join', username: username || `User_${clientId.slice(-4)}`, clientId }));
+        joined = true;
+      }
     };
 
     ws.onmessage = (event) => {

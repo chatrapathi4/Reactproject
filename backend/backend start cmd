@@ -3,3 +3,8 @@
  frontend
 
  npm start
+
+ the problem is 
+ -> in chat and quick chat i can see others messages but i can't see my messages
+ ->in ide when i log in a random user is also joining along with the username i have given
+ -> in whiteboard it is not updating in real time and the quick chat option is gone from whiteboard
