@@ -85,26 +85,22 @@ else:
         }
     }
 
-# Channel Layers Configuration
-REDIS_URL = os.environ.get('REDIS_URL')
-
+# Channel layers (required by Django Channels). Use Redis in production if REDIS_URL is set,
+# otherwise fall back to the in-memory channel layer for local development.
+REDIS_URL = os.environ.get("REDIS_URL")
 if REDIS_URL:
-    # Production - Use Redis
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
                 "hosts": [REDIS_URL],
-                "capacity": 1500,
-                "expiry": 60,
             },
         },
     }
 else:
-    # Local development - Use in-memory
     CHANNEL_LAYERS = {
         "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
     }
 

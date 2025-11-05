@@ -43,7 +43,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     return { x: clientX - rect.left, y: clientY - rect.top };
   }, []);
 
-  // Clear canvas
+  // Define helpers before any useEffect that references them
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -51,30 +51,28 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 
-  // Draw remote stroke
   const drawRemoteStroke = useCallback((stroke) => {
     const canvas = canvasRef.current;
     if (!canvas || !stroke?.points || stroke.points.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
-    ctx.strokeStyle = stroke.color;
-    ctx.lineWidth = stroke.lineWidth;
+    ctx.strokeStyle = stroke.color || currentColor;
+    ctx.lineWidth = stroke.lineWidth || lineWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     ctx.beginPath();
     if (stroke.points.length === 1) {
-      ctx.arc(stroke.points[0].x, stroke.points[0].y, stroke.lineWidth / 2, 0, Math.PI * 2);
+      ctx.arc(stroke.points[0].x, stroke.points[0].y, (stroke.lineWidth || lineWidth) / 2, 0, Math.PI * 2);
       ctx.fill();
     } else {
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
       stroke.points.forEach(point => ctx.lineTo(point.x, point.y));
       ctx.stroke();
     }
-  }, []);
+  }, [currentColor, lineWidth]);
 
-  // Redraw all strokes
   const redrawCanvas = useCallback(() => {
     clearCanvas();
     const canvas = canvasRef.current;
@@ -88,6 +86,7 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
         ctx.lineWidth = obj.lineWidth;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+
         ctx.beginPath();
         if (obj.points.length === 1) {
           ctx.arc(obj.points[0].x, obj.points[0].y, obj.lineWidth / 2, 0, Math.PI * 2);
@@ -101,29 +100,48 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     });
   }, [drawingObjects, clearCanvas]);
 
+  // Keep websocket join idempotent across reconnects
+  const joinedRef = useRef(false);
+
   // WebSocket connection
   useEffect(() => {
     if (!roomName) return;
 
     const clientId = `wb_${Math.floor(Math.random() * 1e9)}`;
 
-    if (wsRef.current && wsRef.current.url?.includes(`/ws/whiteboard/${roomName}/`) && wsRef.current.readyState === WebSocket.OPEN) {
+    // If already connected to the same room, don't recreate socket
+    if (wsRef.current &&
+        wsRef.current.url?.includes(`/ws/whiteboard/${roomName}/`) &&
+        wsRef.current.readyState === WebSocket.OPEN) {
       return;
     }
 
+    // Close previous socket if present
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
       try { wsRef.current.close(); } catch (e) {}
     }
 
-    const ws = new WebSocket(`${WS_BASE_URL}/ws/whiteboard/${roomName}/`);
+    let ws;
+    try {
+      ws = new WebSocket(`${WS_BASE_URL}/ws/whiteboard/${roomName}/`);
+    } catch (err) {
+      console.error('Failed to create WebSocket:', err);
+      return;
+    }
+
     wsRef.current = ws;
-    let joined = false;
+    joinedRef.current = false;
 
     ws.onopen = () => {
       console.log('Connected to whiteboard', roomName, clientId);
-      if (!joined) {
-        ws.send(JSON.stringify({ type: 'join', username, clientId }));
-        joined = true;
+      // only send join once per logical connection
+      if (!joinedRef.current) {
+        try {
+          ws.send(JSON.stringify({ type: 'join', username, clientId }));
+          joinedRef.current = true;
+        } catch (err) {
+          console.error('Failed to send join:', err);
+        }
       }
     };
 
@@ -144,6 +162,9 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
               setDrawingObjects([]);
               clearCanvas();
               break;
+            case 'chat':
+              // optional: handle chat in whiteboard UI
+              break;
             default:
               break;
           }
@@ -153,18 +174,22 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
       }
     };
 
-    ws.onclose = () => {
-      console.log('Disconnected from whiteboard');
+    ws.onclose = (ev) => {
+      console.log('Disconnected from whiteboard', ev, 'code=', ev.code, 'reason=', ev.reason);
       if (wsRef.current === ws) wsRef.current = null;
+      joinedRef.current = false;
     };
 
-    ws.onerror = (err) => console.error('Whiteboard socket error', err);
+    ws.onerror = (err) => {
+      console.error('Whiteboard socket error', err);
+    };
 
     return () => {
-      try { ws.close(); } catch (e) {}
+      try { ws && ws.close(); } catch (e) {}
       if (wsRef.current === ws) wsRef.current = null;
+      joinedRef.current = false;
     };
-  }, [roomName, drawRemoteStroke, clearCanvas, username]);
+  }, [roomName, drawRemoteStroke, clearCanvas, username]); // helpers and username as deps
 
   // Canvas resize listener
   useEffect(() => {
