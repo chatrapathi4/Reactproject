@@ -37,10 +37,8 @@ function IDE({ ideId: propIdeId }) {
     ws.onopen = () => {
       console.log('Connected to IDE WebSocket', ideId, clientId);
       setIsConnected(true);
-      if (!joined) {
-        ws.send(JSON.stringify({ type: 'join', username: username || `User_${clientId.slice(-4)}`, clientId }));
-        joined = true;
-      }
+      // Do NOT auto-send a join here. Wait for the user to explicitly join (avoid sending a generated username
+      // before the user provides their chosen username). The joinIDE() function will send the proper join.
     };
 
     ws.onmessage = (event) => {

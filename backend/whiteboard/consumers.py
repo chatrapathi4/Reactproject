@@ -89,20 +89,17 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "user_list", "users": event.get("users", [])}))
 
     async def drawing_update(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "live_stroke", "stroke": event["stroke_data"]}))
+        # Send live stroke to all clients (including sender) so clients that expect server-echo get the update
+        await self.send(text_data=json.dumps({"type": "live_stroke", "stroke": event["stroke_data"]}))
 
     async def object_added(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "object_added", "object": event["object_data"]}))
+        await self.send(text_data=json.dumps({"type": "object_added", "object": event["object_data"]}))
 
     async def chat_message(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "chat", "message": event["message"]}))
+        await self.send(text_data=json.dumps({"type": "chat", "message": event["message"]}))
 
     async def canvas_cleared(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "canvas_cleared"}))
+        await self.send(text_data=json.dumps({"type": "canvas_cleared"}))
 
 
 class IDEConsumer(AsyncWebsocketConsumer):
@@ -155,20 +152,16 @@ class IDEConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "user_list", "users": event.get("users", [])}))
 
     async def code_update(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "code_update", "code": event["payload"].get("code"), "file": event["payload"].get("file")}))
+        await self.send(text_data=json.dumps({"type": "code_update", "code": event["payload"].get("code"), "file": event["payload"].get("file")}))
 
     async def file_change(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "file_change", "file": event["payload"].get("file"), "code": event["payload"].get("code")}))
+        await self.send(text_data=json.dumps({"type": "file_change", "file": event["payload"].get("file"), "code": event["payload"].get("code")}))
 
     async def output(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "output", "output": event["payload"].get("output")}))
+        await self.send(text_data=json.dumps({"type": "output", "output": event["payload"].get("output")}))
 
     async def run_complete(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "run_complete"}))
+        await self.send(text_data=json.dumps({"type": "run_complete"}))
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
