@@ -96,6 +96,7 @@ class WhiteboardConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "object_added", "object": event["object_data"]}))
 
     async def chat_message(self, event):
+        # Send chat message to all clients (including sender) so clients that expect server-echo get the update
         await self.send(text_data=json.dumps({"type": "chat", "message": event["message"]}))
 
     async def canvas_cleared(self, event):
@@ -214,5 +215,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "user_list", "users": event.get("users", [])}))
 
     async def chat_message(self, event):
-        if event.get("sender_channel") != self.channel_name:
-            await self.send(text_data=json.dumps({"type": "chat", "message": event["message"]}))
+        # Send chat message to all clients (including sender) so clients that expect server-echo get the update
+        await self.send(text_data=json.dumps({"type": "chat", "message": event["message"]}))
