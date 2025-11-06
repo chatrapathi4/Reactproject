@@ -88,16 +88,21 @@ else:
 # Channel layers (required by Django Channels). Use Redis in production if REDIS_URL is set,
 # otherwise fall back to the in-memory channel layer for local development.
 REDIS_URL = os.environ.get("REDIS_URL")
-if REDIS_URL:
+
+def _is_valid_redis_url(u):
+    return isinstance(u, str) and (u.startswith("redis://") or u.startswith("rediss://") or u.startswith("unix://"))
+
+if REDIS_URL and _is_valid_redis_url(REDIS_URL):
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [REDIS_URL],
-            },
+            "CONFIG": {"hosts": [REDIS_URL]},
         },
     }
 else:
+    # Fallback (dev only)
+    import warnings
+    warnings.warn("REDIS_URL not set or invalid. Falling back to InMemoryChannelLayer (dev only).")
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer",
