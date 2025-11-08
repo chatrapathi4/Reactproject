@@ -71,7 +71,6 @@ function Navbar() {
           <div className="user-info">
             <div className="user-avatar">👤</div>
             <div className="user-details">
-              <span className="username">John Doe</span>
               <span className="user-status">Online</span>
             </div>
           </div>
