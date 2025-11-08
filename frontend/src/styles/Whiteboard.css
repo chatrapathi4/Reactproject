@@ -166,6 +166,8 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   cursor: crosshair;
   border: 1px solid rgba(0, 255, 255, 0.2);
+  touch-action: none;
+  -ms-touch-action: none;
 }
 
 .whiteboard-canvas:hover {

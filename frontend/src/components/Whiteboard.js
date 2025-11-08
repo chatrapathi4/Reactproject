@@ -208,6 +208,8 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
   }, [redrawCanvas]);
 
   // Local drawing handlers
+  const currentStrokeRef = useRef(null);
+  
   const startDrawing = useCallback((e) => {
     e.preventDefault();
     const canvas = canvasRef.current;
@@ -217,12 +219,19 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     setIsDrawing(true);
     setLastPoint(pos);
 
+    // Start accumulating the stroke
+    currentStrokeRef.current = {
+      type: 'stroke',
+      points: [pos],
+      color: currentColor,
+      lineWidth,
+      tool: currentTool
+    };
+
     const ctx = canvas.getContext('2d');
     ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
     ctx.strokeStyle = currentTool === 'eraser' ? '#000' : currentColor;
     ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, lineWidth / 2, 0, Math.PI * 2);
     ctx.fill();
@@ -235,10 +244,13 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     if (!canvas) return;
     const pos = getPointerPos(e);
     const ctx = canvas.getContext('2d');
+
     ctx.beginPath();
     ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
+
+    // Send live stroke for realtime remote drawing
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: 'draw_stroke',
@@ -248,6 +260,12 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
         tool: currentTool
       }));
     }
+
+    // Accumulate point into the current stroke
+    if (currentStrokeRef.current) {
+      currentStrokeRef.current.points.push(pos);
+    }
+
     setLastPoint(pos);
   }, [isDrawing, lastPoint, getPointerPos, currentColor, lineWidth, currentTool]);
 
@@ -255,8 +273,26 @@ const Whiteboard = ({ roomName = 'default-room' }) => {
     if (!isDrawing) return;
     setIsDrawing(false);
     setLastPoint(null);
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'draw_complete', tool: currentTool }));
+
+    const stroke = currentStrokeRef.current;
+    currentStrokeRef.current = null;
+
+    if (stroke) {
+      // Persist locally immediately so redraws keep the stroke
+      setDrawingObjects(prev => [...prev, stroke]);
+
+      // Send full stroke object to server as the completed object
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({
+          type: 'draw_complete',
+          object: stroke
+        }));
+      }
+    } else {
+      // Fallback minimal message (keeps older behavior)
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'draw_complete', tool: currentTool }));
+      }
     }
   }, [isDrawing, currentTool]);
 
